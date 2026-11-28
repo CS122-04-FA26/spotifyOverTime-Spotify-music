@@ -1,0 +1,558 @@
+{
+  "dataset": {
+    "train_rows": 120000,
+    "test_rows": 30000,
+    "raw_input_features": [
+      "energy",
+      "valence",
+      "danceability",
+      "acousticness",
+      "instrumentalness",
+      "speechiness",
+      "liveness",
+      "loudness",
+      "tempo",
+      "key",
+      "mode"
+    ],
+    "engineered_model_features": [
+      "energy",
+      "valence",
+      "danceability",
+      "acousticness",
+      "instrumentalness",
+      "speechiness",
+      "liveness",
+      "loudness",
+      "tempo",
+      "energy_x_loudness",
+      "loudness_per_acousticness",
+      "energy_per_acousticness",
+      "valence_x_danceability",
+      "acoustic_x_instrumental",
+      "loudness_per_energy",
+      "key",
+      "mode"
+    ],
+    "era_order": [
+      "<2000",
+      "2000-2010",
+      "2011-2020",
+      "2021+"
+    ],
+    "class_weights": {
+      "<2000": {
+        "train_count": 406,
+        "train_pct": 0.3383,
+        "test_count": 102,
+        "balanced_weight": 73.8916
+      },
+      "2000-2010": {
+        "train_count": 50279,
+        "train_pct": 41.8992,
+        "test_count": 12569,
+        "balanced_weight": 0.5967
+      },
+      "2011-2020": {
+        "train_count": 54593,
+        "train_pct": 45.4942,
+        "test_count": 13648,
+        "balanced_weight": 0.5495
+      },
+      "2021+": {
+        "train_count": 14722,
+        "train_pct": 12.2683,
+        "test_count": 3681,
+        "balanced_weight": 2.0378
+      }
+    }
+  },
+  "recommended_production_model": {
+    "key": "ordinal_gbdt",
+    "model_name": "Ordinal GBDT (Frank & Hall)",
+    "artifact": "best_era_model.joblib",
+    "size_kb": 1478.1
+  },
+  "models": {
+    "logistic_regression": {
+      "model_name": "Logistic Regression (Balanced)",
+      "accuracy": 0.3009,
+      "balanced_accuracy": 0.4048832007530273,
+      "macro_f1": 0.24287094425545697,
+      "weighted_f1": 0.34905134960514267,
+      "macro_roc_auc": 0.6210714812939491,
+      "within_1_era_accuracy": 0.7646333333333334,
+      "era_mae": 0.963,
+      "per_era": {
+        "<2000": {
+          "precision": 0.01013044684984735,
+          "recall": 0.7156862745098039,
+          "f1_score": 0.019978106185002738,
+          "support": 102
+        },
+        "2000-2010": {
+          "precision": 0.4930547960188122,
+          "recall": 0.35866019571962765,
+          "f1_score": 0.4152542372881356,
+          "support": 12569
+        },
+        "2011-2020": {
+          "precision": 0.5004495055439017,
+          "recall": 0.2447245017584994,
+          "f1_score": 0.32870780434996555,
+          "support": 13648
+        },
+        "2021+": {
+          "precision": 0.1585208542353447,
+          "recall": 0.3004618310241782,
+          "f1_score": 0.20754362919872396,
+          "support": 3681
+        }
+      },
+      "confusion_matrix_labels": [
+        "<2000",
+        "2000-2010",
+        "2011-2020",
+        "2021+"
+      ],
+      "confusion_matrix": [
+        [
+          73,
+          12,
+          8,
+          9
+        ],
+        [
+          3276,
+          4508,
+          2507,
+          2278
+        ],
+        [
+          3010,
+          3714,
+          3340,
+          3584
+        ],
+        [
+          847,
+          909,
+          819,
+          1106
+        ]
+      ],
+      "confusion_matrix_recall_normalized": [
+        [
+          0.7157,
+          0.1176,
+          0.0784,
+          0.0882
+        ],
+        [
+          0.2606,
+          0.3587,
+          0.1995,
+          0.1812
+        ],
+        [
+          0.2205,
+          0.2721,
+          0.2447,
+          0.2626
+        ],
+        [
+          0.2301,
+          0.2469,
+          0.2225,
+          0.3005
+        ]
+      ],
+      "artifact_file": "logistic_regression_era.joblib",
+      "artifact_size_kb": 6.2
+    },
+    "random_forest": {
+      "model_name": "Random Forest (Balanced)",
+      "accuracy": 0.4129,
+      "balanced_accuracy": 0.3921901709819283,
+      "macro_f1": 0.2987211095545097,
+      "weighted_f1": 0.43215842528319615,
+      "macro_roc_auc": 0.6491884770461971,
+      "within_1_era_accuracy": 0.8650333333333333,
+      "era_mae": 0.7294,
+      "per_era": {
+        "<2000": {
+          "precision": 0.019825918762088973,
+          "recall": 0.4019607843137255,
+          "f1_score": 0.03778801843317972,
+          "support": 102
+        },
+        "2000-2010": {
+          "precision": 0.5104061111544158,
+          "recall": 0.5209642771899117,
+          "f1_score": 0.5156311520592173,
+          "support": 12569
+        },
+        "2011-2020": {
+          "precision": 0.5191753491465307,
+          "recall": 0.343200468933177,
+          "f1_score": 0.41323334803705336,
+          "support": 13648
+        },
+        "2021+": {
+          "precision": 0.183193553691827,
+          "recall": 0.3026351534908992,
+          "f1_score": 0.2282319196885884,
+          "support": 3681
+        }
+      },
+      "confusion_matrix_labels": [
+        "<2000",
+        "2000-2010",
+        "2011-2020",
+        "2021+"
+      ],
+      "confusion_matrix": [
+        [
+          41,
+          36,
+          17,
+          8
+        ],
+        [
+          1029,
+          6548,
+          3206,
+          1786
+        ],
+        [
+          786,
+          5005,
+          4684,
+          3173
+        ],
+        [
+          212,
+          1240,
+          1115,
+          1114
+        ]
+      ],
+      "confusion_matrix_recall_normalized": [
+        [
+          0.402,
+          0.3529,
+          0.1667,
+          0.0784
+        ],
+        [
+          0.0819,
+          0.521,
+          0.2551,
+          0.1421
+        ],
+        [
+          0.0576,
+          0.3667,
+          0.3432,
+          0.2325
+        ],
+        [
+          0.0576,
+          0.3369,
+          0.3029,
+          0.3026
+        ]
+      ],
+      "artifact_file": "random_forest_era.joblib",
+      "artifact_size_kb": 29283.4
+    },
+    "gradient_boosted_trees": {
+      "model_name": "Gradient Boosted Trees (Balanced)",
+      "accuracy": 0.39303333333333335,
+      "balanced_accuracy": 0.4007388441931483,
+      "macro_f1": 0.29167250755033064,
+      "weighted_f1": 0.4171432512903738,
+      "macro_roc_auc": 0.6511992896679373,
+      "within_1_era_accuracy": 0.8424666666666667,
+      "era_mae": 0.7725,
+      "per_era": {
+        "<2000": {
+          "precision": 0.01967799642218247,
+          "recall": 0.43137254901960786,
+          "f1_score": 0.037639007698887936,
+          "support": 102
+        },
+        "2000-2010": {
+          "precision": 0.5213361169102296,
+          "recall": 0.4966982257936192,
+          "f1_score": 0.5087190352020861,
+          "support": 12569
+        },
+        "2011-2020": {
+          "precision": 0.5262822960417463,
+          "recall": 0.30297479484173506,
+          "f1_score": 0.38456172983027204,
+          "support": 13648
+        },
+        "2021+": {
+          "precision": 0.1725920322743318,
+          "recall": 0.37190980711763105,
+          "f1_score": 0.23577025747007663,
+          "support": 3681
+        }
+      },
+      "confusion_matrix_labels": [
+        "<2000",
+        "2000-2010",
+        "2011-2020",
+        "2021+"
+      ],
+      "confusion_matrix": [
+        [
+          44,
+          27,
+          15,
+          16
+        ],
+        [
+          1102,
+          6243,
+          2700,
+          2524
+        ],
+        [
+          866,
+          4624,
+          4135,
+          4023
+        ],
+        [
+          224,
+          1081,
+          1007,
+          1369
+        ]
+      ],
+      "confusion_matrix_recall_normalized": [
+        [
+          0.4314,
+          0.2647,
+          0.1471,
+          0.1569
+        ],
+        [
+          0.0877,
+          0.4967,
+          0.2148,
+          0.2008
+        ],
+        [
+          0.0635,
+          0.3388,
+          0.303,
+          0.2948
+        ],
+        [
+          0.0609,
+          0.2937,
+          0.2736,
+          0.3719
+        ]
+      ],
+      "artifact_file": "gradient_boosted_era.joblib",
+      "artifact_size_kb": 1033.9
+    },
+    "ordinal_gbdt": {
+      "model_name": "Ordinal GBDT (Frank & Hall)",
+      "accuracy": 0.45006666666666667,
+      "balanced_accuracy": 0.34389691005885437,
+      "macro_f1": 0.30327260744003354,
+      "weighted_f1": 0.4424154248197955,
+      "macro_roc_auc": 0.6380731180318437,
+      "within_1_era_accuracy": 0.9144333333333333,
+      "era_mae": 0.6368,
+      "per_era": {
+        "<2000": {
+          "precision": 0.03666666666666667,
+          "recall": 0.21568627450980393,
+          "f1_score": 0.06267806267806268,
+          "support": 102
+        },
+        "2000-2010": {
+          "precision": 0.48135262161997194,
+          "recall": 0.627416660036598,
+          "f1_score": 0.5447637468914065,
+          "support": 12569
+        },
+        "2011-2020": {
+          "precision": 0.4962106102911847,
+          "recall": 0.3645955451348183,
+          "f1_score": 0.42034127386382836,
+          "support": 13648
+        },
+        "2021+": {
+          "precision": 0.2067581130812981,
+          "recall": 0.16788916055419723,
+          "f1_score": 0.18530734632683657,
+          "support": 3681
+        }
+      },
+      "confusion_matrix_labels": [
+        "<2000",
+        "2000-2010",
+        "2011-2020",
+        "2021+"
+      ],
+      "confusion_matrix": [
+        [
+          22,
+          68,
+          11,
+          1
+        ],
+        [
+          345,
+          7886,
+          3679,
+          659
+        ],
+        [
+          195,
+          6766,
+          4976,
+          1711
+        ],
+        [
+          38,
+          1663,
+          1362,
+          618
+        ]
+      ],
+      "confusion_matrix_recall_normalized": [
+        [
+          0.2157,
+          0.6667,
+          0.1078,
+          0.0098
+        ],
+        [
+          0.0274,
+          0.6274,
+          0.2927,
+          0.0524
+        ],
+        [
+          0.0143,
+          0.4958,
+          0.3646,
+          0.1254
+        ],
+        [
+          0.0103,
+          0.4518,
+          0.37,
+          0.1679
+        ]
+      ],
+      "artifact_file": "ordinal_gbdt_era.joblib",
+      "artifact_size_kb": 1478.1
+    },
+    "mlp_neural_net": {
+      "model_name": "MLP Neural Network (Balanced)",
+      "accuracy": 0.40526666666666666,
+      "balanced_accuracy": 0.319411244577485,
+      "macro_f1": 0.28233658164995923,
+      "weighted_f1": 0.4034341632360496,
+      "macro_roc_auc": 0.6311862810601621,
+      "within_1_era_accuracy": 0.8485333333333334,
+      "era_mae": 0.7475333333333334,
+      "per_era": {
+        "<2000": {
+          "precision": 0.021897810218978103,
+          "recall": 0.058823529411764705,
+          "f1_score": 0.031914893617021274,
+          "support": 102
+        },
+        "2000-2010": {
+          "precision": 0.4983314794215795,
+          "recall": 0.6059352374890604,
+          "f1_score": 0.5468907080281488,
+          "support": 12569
+        },
+        "2011-2020": {
+          "precision": 0.5379048931771192,
+          "recall": 0.2287514654161782,
+          "f1_score": 0.32099527040921244,
+          "support": 13648
+        },
+        "2021+": {
+          "precision": 0.1636763514295636,
+          "recall": 0.3841347459929367,
+          "f1_score": 0.22954545454545455,
+          "support": 3681
+        }
+      },
+      "confusion_matrix_labels": [
+        "<2000",
+        "2000-2010",
+        "2011-2020",
+        "2021+"
+      ],
+      "confusion_matrix": [
+        [
+          6,
+          69,
+          12,
+          15
+        ],
+        [
+          138,
+          7616,
+          1926,
+          2889
+        ],
+        [
+          105,
+          6100,
+          3122,
+          4321
+        ],
+        [
+          25,
+          1498,
+          744,
+          1414
+        ]
+      ],
+      "confusion_matrix_recall_normalized": [
+        [
+          0.0588,
+          0.6765,
+          0.1176,
+          0.1471
+        ],
+        [
+          0.011,
+          0.6059,
+          0.1532,
+          0.2299
+        ],
+        [
+          0.0077,
+          0.447,
+          0.2288,
+          0.3166
+        ],
+        [
+          0.0068,
+          0.407,
+          0.2021,
+          0.3841
+        ]
+      ],
+      "artifact_file": "mlp_era.joblib",
+      "artifact_size_kb": 296.9
+    }
+  }
+}
