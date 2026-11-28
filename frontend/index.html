@@ -15,6 +15,7 @@
     --panel-light: #282828;
     --text: #ffffff;
     --muted: #b3b3b3;
+    --error: #ff6b6b;
   }
   * { box-sizing: border-box; }
   body {
@@ -82,7 +83,18 @@
     transition: border-color 0.2s;
   }
   .file-upload:hover { border-color: var(--green); }
+  .file-upload.has-file { border-color: var(--green); color: var(--text); }
   .file-upload input[type="file"] { display: none; }
+  .clear-file {
+    display: none;
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: underline;
+    cursor: pointer;
+    text-align: right;
+  }
+  .clear-file.visible { display: block; }
   button {
     width: 100%;
     margin-top: 28px;
@@ -96,9 +108,22 @@
     font-size: 0.95rem;
     letter-spacing: 0.03em;
     cursor: pointer;
-    transition: transform 0.1s, background 0.2s;
+    transition: transform 0.1s, background 0.2s, opacity 0.2s;
   }
-  button:hover { background: #1ed760; transform: scale(1.02); }
+  button:hover:not(:disabled) { background: #1ed760; transform: scale(1.02); }
+  button:disabled { opacity: 0.65; cursor: wait; }
+
+  .error-box {
+    margin-top: 18px;
+    padding: 12px 14px;
+    border-radius: 6px;
+    background: rgba(255, 107, 107, 0.12);
+    border: 1px solid rgba(255, 107, 107, 0.4);
+    color: var(--error);
+    font-size: 0.88rem;
+    display: none;
+  }
+  .error-box.visible { display: block; }
 
   .result-box {
     margin-top: 28px;
@@ -120,15 +145,25 @@
     margin-bottom: 14px;
   }
   .result-para {
-    font-size: 0.95rem;
-    line-height: 1.5;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin-top: 16px;
+    margin-bottom: 0;
   }
   .confidence-bar-row {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 6px 0;
+    margin: 7px 0;
     font-size: 0.85rem;
+  }
+  .confidence-label {
+    width: 90px;
+  }
+  .confidence-pct {
+    width: 42px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
   .confidence-bar-track {
     flex: 1;
@@ -141,6 +176,7 @@
     height: 100%;
     background: var(--green);
     border-radius: 999px;
+    transition: width 0.35s ease;
   }
 </style>
 </head>
@@ -151,68 +187,191 @@
 
   <div class="card">
     <label for="songSearch">Search by song name</label>
-    <input type="text" id="songSearch" placeholder="e.g. Blinding Lights" />
+    <input type="text" id="songSearch" list="songSuggestions" placeholder="e.g. Blinding Lights" autocomplete="off" />
+    <datalist id="songSuggestions"></datalist>
 
     <label>Or upload an audio file</label>
     <div class="file-upload" id="fileUploadBox">
-      <input type="file" id="fileInput" accept=".mp3,audio/*" />
-      <span id="fileLabel">Click to choose an .mp3 file</span>
+      <input type="file" id="fileInput" accept=".mp3,.wav,.ogg,.m4a,.flac,audio/*" />
+      <span id="fileLabel">Click to choose an .mp3 or .wav file</span>
     </div>
+    <div class="clear-file" id="clearFileBtn">Clear selected file</div>
 
     <button id="predictBtn">PREDICT ERA</button>
 
+    <div class="error-box" id="errorBox"></div>
+
     <div class="result-box" id="resultBox">
       <div class="result-era" id="resultEra">2011&ndash;2020</div>
-      <div class="result-sub" id="resultSong">Matched for: "Example Song Title"</div>
+      <div class="result-sub" id="resultSong"></div>
 
       <div class="confidence-bar-row">
-        <span style="width:90px;">&lt;2000</span>
-        <div class="confidence-bar-track"><div class="confidence-bar-fill" style="width:8%;"></div></div>
-        <span>8%</span>
+        <span class="confidence-label">&lt;2000</span>
+        <div class="confidence-bar-track"><div class="confidence-bar-fill" id="bar-lt2000" style="width:0%;"></div></div>
+        <span class="confidence-pct" id="pct-lt2000">0%</span>
       </div>
       <div class="confidence-bar-row">
-        <span style="width:90px;">2000&ndash;2010</span>
-        <div class="confidence-bar-track"><div class="confidence-bar-fill" style="width:17%;"></div></div>
-        <span>17%</span>
+        <span class="confidence-label">2000&ndash;2010</span>
+        <div class="confidence-bar-track"><div class="confidence-bar-fill" id="bar-2000" style="width:0%;"></div></div>
+        <span class="confidence-pct" id="pct-2000">0%</span>
       </div>
       <div class="confidence-bar-row">
-        <span style="width:90px;">2011&ndash;2020</span>
-        <div class="confidence-bar-track"><div class="confidence-bar-fill" style="width:61%;"></div></div>
-        <span>61%</span>
+        <span class="confidence-label">2011&ndash;2020</span>
+        <div class="confidence-bar-track"><div class="confidence-bar-fill" id="bar-2011" style="width:0%;"></div></div>
+        <span class="confidence-pct" id="pct-2011">0%</span>
       </div>
       <div class="confidence-bar-row">
-        <span style="width:90px;">2021+</span>
-        <div class="confidence-bar-track"><div class="confidence-bar-fill" style="width:14%;"></div></div>
-        <span>14%</span>
+        <span class="confidence-label">2021+</span>
+        <div class="confidence-bar-track"><div class="confidence-bar-fill" id="bar-2021" style="width:0%;"></div></div>
+        <span class="confidence-pct" id="pct-2021">0%</span>
       </div>
 
-      <p class="result-para" id="resultPara">
-        This track's high energy, moderate acousticness, and danceability profile most closely
-        resembles songs from 2011&ndash;2020 &mdash; a period marked by a rebound in production
-        energy after the quieter 2000s.
-      </p>
+      <p class="result-para" id="resultPara"></p>
     </div>
   </div>
 
 <script>
+  const API_BASE = window.location.protocol === 'file:' ? 'http://127.0.0.1:5000' : '';
+
   const fileInput = document.getElementById('fileInput');
   const fileLabel = document.getElementById('fileLabel');
   const fileUploadBox = document.getElementById('fileUploadBox');
+  const clearFileBtn = document.getElementById('clearFileBtn');
   const predictBtn = document.getElementById('predictBtn');
   const resultBox = document.getElementById('resultBox');
+  const errorBox = document.getElementById('errorBox');
   const songSearch = document.getElementById('songSearch');
+  const songSuggestions = document.getElementById('songSuggestions');
+
+  const ERA_FORMAT = {
+    '<2000': '<2000',
+    '2000-2010': '2000\u20132010',
+    '2011-2020': '2011\u20132020',
+    '2021+': '2021+'
+  };
+
+  const BAR_IDS = {
+    '<2000': ['bar-lt2000', 'pct-lt2000'],
+    '2000-2010': ['bar-2000', 'pct-2000'],
+    '2011-2020': ['bar-2011', 'pct-2011'],
+    '2021+': ['bar-2021', 'pct-2021']
+  };
 
   fileUploadBox.addEventListener('click', () => fileInput.click());
+
   fileInput.addEventListener('change', () => {
     if (fileInput.files.length > 0) {
       fileLabel.textContent = fileInput.files[0].name;
+      fileUploadBox.classList.add('has-file');
+      clearFileBtn.classList.add('visible');
+      songSearch.value = '';
     }
   });
 
-  predictBtn.addEventListener('click', () => {
-    const songName = songSearch.value.trim() || (fileInput.files[0] ? fileInput.files[0].name : 'Example Song Title');
-    document.getElementById('resultSong').textContent = `Matched for: "${songName}"`;
+  clearFileBtn.addEventListener('click', () => {
+    fileInput.value = '';
+    fileLabel.textContent = 'Click to choose an .mp3 or .wav file';
+    fileUploadBox.classList.remove('has-file');
+    clearFileBtn.classList.remove('visible');
+  });
+
+  let searchTimer = null;
+  songSearch.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const q = songSearch.value.trim();
+    if (q.length < 2) return;
+    searchTimer = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(q)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        songSuggestions.innerHTML = '';
+        (data.results || []).forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item.display;
+          songSuggestions.appendChild(opt);
+        });
+      } catch (_) {}
+    }, 220);
+  });
+
+  songSearch.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') predictBtn.click();
+  });
+
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.classList.add('visible');
+    resultBox.classList.remove('visible');
+  }
+
+  function renderResult(data) {
+    errorBox.classList.remove('visible');
+    document.getElementById('resultEra').textContent = ERA_FORMAT[data.predicted_era] || data.predicted_era;
+
+    if (data.source === 'catalog') {
+      const yearInfo = data.release_year ? ` (${data.release_year}, actual era: ${ERA_FORMAT[data.actual_era] || data.actual_era})` : '';
+      document.getElementById('resultSong').textContent = `Matched: "${data.matched_song}" by ${data.artist}${yearInfo}`;
+    } else if (data.source === 'audio_upload') {
+      document.getElementById('resultSong').textContent = `Analyzed audio file: "${data.matched_song}"`;
+    } else {
+      document.getElementById('resultSong').textContent = `Analyzed: "${data.matched_song}"`;
+    }
+
+    const probs = data.probabilities || {};
+    Object.keys(BAR_IDS).forEach((era) => {
+      const pct = Math.round((probs[era] || 0) * 100);
+      const [barId, pctId] = BAR_IDS[era];
+      document.getElementById(barId).style.width = `${pct}%`;
+      document.getElementById(pctId).textContent = `${pct}%`;
+    });
+
+    document.getElementById('resultPara').textContent = data.explanation || '';
     resultBox.classList.add('visible');
+  }
+
+  predictBtn.addEventListener('click', async () => {
+    const hasFile = fileInput.files && fileInput.files.length > 0;
+    const query = songSearch.value.trim();
+
+    if (!hasFile && !query) {
+      showError('Please enter a song name or choose an audio file first.');
+      return;
+    }
+
+    predictBtn.disabled = true;
+    predictBtn.textContent = 'PREDICTING...';
+    errorBox.classList.remove('visible');
+
+    try {
+      let response;
+      if (hasFile && !query) {
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        response = await fetch(`${API_BASE}/api/predict-audio`, {
+          method: 'POST',
+          body: formData
+        });
+      } else {
+        response = await fetch(`${API_BASE}/api/predict`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query })
+        });
+      }
+
+      const data = await response.json();
+      if (!response.ok) {
+        showError(data.error || 'Prediction request failed.');
+      } else {
+        renderResult(data);
+      }
+    } catch (err) {
+      showError('Could not connect to the Flask backend. Make sure `python src/app.py` is running on port 5000.');
+    } finally {
+      predictBtn.disabled = false;
+      predictBtn.textContent = 'PREDICT ERA';
+    }
   });
 </script>
 
